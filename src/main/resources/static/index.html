@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring bus firehose dashboard</title>
+
+    <link href="webjars/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <![endif]-->
+</head>
+
+<body>
+<script src="webjars/jquery/2.1.4/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="webjars/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script>
+
+    function checkConnection(){
+        $("#messageLabel").toggle(false);
+        var data = {host: $("#host").val(), port: $("#port").val(), timeout: $("#timeout option:selected").text() *1000 }
+        $.ajax({
+            type: "POST",
+            url: "/connection-test",
+            contentType:"application/json",
+            data: JSON.stringify(data),
+            dataType: "json",
+            success : showResults
+
+        });
+    }
+
+    function showResults(data){
+
+        if(data.successful){
+            message = "Connection succeeded!";
+            $("#messageLabel").css("background-color","#dff0d8");
+
+        }else{
+            message = "Connection failed. Reason: " + data.cause;
+            $("#messageLabel").css("background-color","#f2dede");
+        }
+
+        $("#messageLabel").toggle(true);
+        $("#messageLabel").text(message);
+    }
+
+    $(document).ready(
+
+            function(){
+                $("#messageLabel").toggle(false);
+                $("#testbtn").on('click', function(event){
+                    event.preventDefault();
+                    checkConnection();
+                })
+            }
+    );
+</script>
+
+<h1><p class="text-center">Connection test</p></h1>
+
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-9 form-inline">
+        <div class="form-group">
+            <label for="host">Host: </label>
+            <input type="text" class="form-control" id="host" placeholder="10.0.0.1">
+        </div>
+        <div class="form-group">
+            <label for="port">Port: </label>
+            <input type="text" class="form-control" id="port" placeholder="8888">
+        </div>
+        <div class="form-group">
+            <label for="timeout">Timeout (seconds): </label>
+            <select class="form-control" id="timeout">
+                <option>15</option>
+                <option>30</option>
+                <option>60</option>
+
+            </select>
+
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-primary" id="testbtn">Test</button>
+        </div>
+
+    </div>
+    <div class="col-md-1"></div>
+</div>
+<div class="row"></div>
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-9">
+        <h3 id="messageLabel"></h3>
+    </div>
+    <div class="col-md-1"></div>
+</div>
+
+
+</body>
+</html>
